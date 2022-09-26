@@ -26,6 +26,12 @@ pub struct PacketHeader {
     length: u32, // 4 bytes
 }
 
+impl PacketHeader {
+    pub fn check_magic(&self) -> bool {
+        self.magic == MAGIC
+    }
+}
+
 const_assert!(std::mem::size_of::<Command>() == 2);
 const_assert!(std::mem::size_of::<PacketHeader>() == 10);
 
@@ -38,7 +44,7 @@ pub struct PacketHeady {
 
 impl PacketHeady {
     pub fn checksum(&self) -> [u8; 16] {
-        let mut encoded: Vec<u8> = bincode::serialize(&self).unwrap();
+        let encoded: Vec<u8> = bincode::serialize(&self).unwrap();
         let mut hasher = Md5::new();
         hasher.update(encoded);
         let tmp = hasher.finalize();
