@@ -1,0 +1,1 @@
+pub const MAGIC: u32 = 0x596F7275;
