@@ -22,8 +22,8 @@ pub enum Command {
 #[repr(packed)]
 pub struct PacketHeader {
     magic: u32, // 4 bytes
-    command: Command, // 2 bytes
-    length: u32, // 4 bytes
+    pub command: Command, // 2 bytes
+    pub length: u32, // 4 bytes
 }
 
 impl PacketHeader {
@@ -38,8 +38,8 @@ const_assert!(std::mem::size_of::<PacketHeader>() == 10);
 // header || body
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct PacketHeady {
-    header: PacketHeader,
-    body: Vec<u8>,
+    pub header: PacketHeader,
+    pub body: Vec<u8>,
 }
 
 impl PacketHeady {
@@ -67,8 +67,8 @@ impl PacketHeady {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Packet {
-    heady: PacketHeady,
-    checksum: [u8; 16], // md5 checksum of (header || body)
+    pub heady: PacketHeady,
+    pub checksum: [u8; 16], // md5 checksum of (header || body)
 }
 
 impl Packet {
