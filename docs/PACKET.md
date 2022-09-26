@@ -8,7 +8,7 @@
 
 그리고 slave와 master 모두 `secp256k1` 타원곡선을 이용해서 ECDH로 공유 키 $k$를 만듦.
 
-그리고 slave는 $k || k_{s}^{p}$로 구성된 토큰 $t$을 만들어서 가지고 있음. (그리고 $|k_s| = |k_m|$으로 고정이고 아마 128비트로 할듯)
+그리고 slave는 $k || k_{s}^{p}$로 구성된 토큰 $t$을 만들어서 가지고 있음. (그리고 $|k_s| = |k_m|$으로 고정이고 256비트임)
 
 ## Verify Token
 slave가 `VERIFY_TOKEN` 커맨드로 $t$를 보내면 master는 그걸 받아서 $k_{s}^{p}$를 이용해서 공유 키 $k^{\prime}$를 만들고 그게 $k$랑 동일한지 검사. 그 여부를 `REQ_VERIFY_TOKEN`으로 반환해줌.

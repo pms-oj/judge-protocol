@@ -3,6 +3,8 @@ extern crate static_assertions;
 
 pub mod constants;
 pub mod packet;
+pub mod handshake;
+pub mod login;
 
 #[cfg(test)]
 mod tests {
