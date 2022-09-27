@@ -80,6 +80,7 @@ impl Packet {
         stream.read_exact(&mut buf).await?;
         dbg!(buf.clone());
         if let Ok(header) = bincode::deserialize::<PacketHeader>(&buf) {
+            dbg!(header.clone());
             if header.check_magic() {
                 let mut buf_end: Vec<u8> = Vec::new();
                 buf_end.resize((header.length as usize) + 16, 0);
@@ -87,6 +88,7 @@ impl Packet {
                 let mut buf_all: Vec<u8> = buf.to_vec();
                 buf_all.append(&mut buf_end);
                 if let Ok(packet) = bincode::deserialize::<Packet>(&buf_all) {
+                    dbg!(packet.clone());
                     if packet.verify() {
                         Ok(packet)
                     } else {
