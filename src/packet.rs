@@ -11,16 +11,16 @@ use super::constants::{HEADER_SIZE, MAGIC};
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq)]
 #[repr(u32)]
 pub enum Command {
-    HANDSHAKE = 0x00,
+    Handshake = 0x00,
     // Client
-    VERIFY_TOKEN = 0x01,
-    GET_LOGIN = 0x02, // with key exchange by ECDH
-    GET_JUDGE = 0x03,
+    VerifyToken = 0x01,
+    GetLogin = 0x02, // with key exchange by ECDH
+    ReqJudge = 0x03,
     // Server
-    REQ_VERIFY_TOKEN = 0xF1,
-    REQ_LOGIN = 0xF2,
-    REQ_JUDGE = 0xF3,
-    UNKNOWN = 0xFF,
+    ReqVerifyToken = 0xF1,
+    ReqLogin = 0xF2,
+    GetJudge = 0xF3,
+    Unknown = 0xFF,
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq)]
@@ -95,7 +95,7 @@ impl Packet {
             dbg!(header.clone());
             if header.check_magic() {
                 let mut body: Vec<u8> = Vec::new();
-                body.resize((header.length as usize), 0);
+                body.resize(header.length as usize, 0);
                 stream.read_exact(body.as_mut_slice()).await?;
                 let mut checksum: [u8; 16] = [0; 16];
                 stream.read_exact(&mut checksum).await?;

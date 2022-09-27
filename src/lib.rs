@@ -5,6 +5,7 @@ pub mod constants;
 pub mod handshake;
 pub mod login;
 pub mod packet;
+pub mod token;
 
 #[cfg(test)]
 mod tests {
