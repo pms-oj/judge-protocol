@@ -78,6 +78,7 @@ impl Packet {
     ) -> async_std::io::Result<Self> {
         let mut buf: [u8; HEADER_SIZE] = [0; HEADER_SIZE];
         stream.read_exact(&mut buf).await?;
+        dbg!(buf.clone());
         if let Ok(header) = bincode::deserialize::<PacketHeader>(&buf) {
             if header.check_magic() {
                 let mut buf_end: Vec<u8> = Vec::new();
