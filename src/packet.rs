@@ -80,6 +80,7 @@ impl Packet {
         stream.write_all(&bincode::serialize(&header).unwrap()).await?;
         stream.write_all(&body).await?;
         stream.write_all(&checksum).await?;
+        stream.flush().await?;
         Ok(())
     }
 
