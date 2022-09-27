@@ -24,7 +24,7 @@ pub enum Command {
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq)]
-#[repr(packed)]
+#[repr(C, packed)]
 pub struct PacketHeader {
     magic: u32,           // 4 bytes
     pub command: Command, // 2 bytes
