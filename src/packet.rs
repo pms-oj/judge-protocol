@@ -38,7 +38,7 @@ impl PacketHeader {
 }
 
 const_assert!(std::mem::size_of::<Command>() == 4);
-const_assert!(std::mem::size_of::<PacketHeader>() == 12);
+const_assert!(std::mem::size_of::<PacketHeader>() == HEADER_SIZE);
 
 // header || body
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
