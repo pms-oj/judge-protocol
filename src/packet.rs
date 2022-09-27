@@ -73,7 +73,17 @@ pub struct Packet {
 }
 
 impl Packet {
-    pub async fn from_stream<T: Read + ReadExt + Write + WriteExt>(
+    pub async fn send<T: Write + WriteExt>(&self, mut stream: Pin<&mut T>) -> async_std::io::Result<()> {
+        let header = self.heady.header;
+        let body = self.heady.body.clone();
+        let checksum = self.checksum;
+        stream.write_all(&bincode::serialize(&header).unwrap()).await?;
+        stream.write_all(&body).await?;
+        stream.write_all(&checksum).await?;
+        Ok(())
+    }
+
+    pub async fn from_stream<T: Read + ReadExt>(
         mut stream: Pin<&mut T>,
     ) -> async_std::io::Result<Self> {
         let mut buf: [u8; HEADER_SIZE] = [0; HEADER_SIZE];
