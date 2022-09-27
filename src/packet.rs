@@ -9,7 +9,7 @@ use bincode::Options;
 use super::constants::{HEADER_SIZE, MAGIC};
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq)]
-#[repr(u16)]
+#[repr(u32)]
 pub enum Command {
     HANDSHAKE = 0x00,
     // Client
@@ -37,8 +37,8 @@ impl PacketHeader {
     }
 }
 
-const_assert!(std::mem::size_of::<Command>() == 2);
-const_assert!(std::mem::size_of::<PacketHeader>() == 10);
+const_assert!(std::mem::size_of::<Command>() == 4);
+const_assert!(std::mem::size_of::<PacketHeader>() == 12);
 
 // header || body
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
