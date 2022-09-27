@@ -22,7 +22,7 @@ pub enum Command {
     UNKNOWN = 0xFF,
 }
 
-#[derive(Serialize, Deserialize, Clone, Copy, Debug)]
+#[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq)]
 #[repr(packed)]
 pub struct PacketHeader {
     magic: u32,           // 4 bytes
@@ -40,7 +40,7 @@ const_assert!(std::mem::size_of::<Command>() == 2);
 const_assert!(std::mem::size_of::<PacketHeader>() == 10);
 
 // header || body
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct PacketHeady {
     pub header: PacketHeader,
     pub body: Vec<u8>,
@@ -66,7 +66,7 @@ impl PacketHeady {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Packet {
     pub heady: PacketHeady,
     pub checksum: [u8; 16], // md5 checksum of (header || body)
