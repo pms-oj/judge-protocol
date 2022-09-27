@@ -82,18 +82,18 @@ impl Packet {
         if let Ok(header) = bincode::deserialize::<PacketHeader>(&buf) {
             dbg!(header.clone());
             if header.check_magic() {
-                let mut buf_end: Vec<u8> = Vec::new();
-                buf_end.resize((header.length as usize) + 16, 0);
-                stream.read_exact(buf_end.as_mut_slice()).await?;
-                let mut buf_all: Vec<u8> = buf.to_vec();
-                buf_all.append(&mut buf_end);
-                if let Ok(packet) = bincode::deserialize::<Packet>(&buf_all) {
-                    dbg!(packet.clone());
-                    if packet.verify() {
-                        Ok(packet)
-                    } else {
-                        Err(Error::new(ErrorKind::InvalidData, "Packet was invalid"))
-                    }
+                let mut body: Vec<u8> = Vec::new();
+                body.resize((header.length as usize), 0);
+                stream.read_exact(body.as_mut_slice()).await?;
+                let mut checksum: [u8; 16] = [0; 16];
+                stream.read_exact(&mut checksum).await?;
+                let packet = Packet {
+                    heady: PacketHeady { header, body },
+                    checksum,
+                };
+                dbg!(packet.clone());
+                if packet.verify() {
+                    Ok(packet)
                 } else {
                     Err(Error::new(ErrorKind::InvalidData, "Packet was invalid"))
                 }
