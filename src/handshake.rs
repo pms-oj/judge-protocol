@@ -8,10 +8,18 @@ pub struct HandshakeRequest {
     pub pass: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+pub enum HandshakeResult {
+    Success,
+    PasswordNotMatched,
+    Unknown,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct HandshakeResult {
-    pub node_id: u32, // asigned
-    pub server_pubkey: PublicKey,
+pub struct HandshakeResponse {
+    pub result: HandshakeResult,
+    pub node_id: Option<u32>, // asigned
+    pub server_pubkey: Option<PublicKey>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
