@@ -3,6 +3,12 @@ use k256::PublicKey;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct HandshakeRequest {
+    pub client_pubkey: PublicKey,
+    pub pass: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct HandshakeResult {
     pub node_id: u32, // asigned
     pub server_pubkey: PublicKey,
