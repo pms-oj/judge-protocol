@@ -25,6 +25,7 @@ pub struct HandshakeResponse {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BodyAfterHandshake<T> {
     pub node_id: u32,
+    pub client_pubkey: PublicKey,
     pub req: T,
 }
 
