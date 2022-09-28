@@ -10,5 +10,5 @@ static_assertions = "1"
 serde = { version="1", features = ["derive"] }
 bincode = "1.3.3"
 md-5 = "0.10.5"
-k256 = "0.11.5"
+k256 = { version = "0.11.5", features = ["default", "ecdh", "serde"] }
 async-std = "1.12.0"
