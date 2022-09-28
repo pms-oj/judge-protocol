@@ -1,10 +1,10 @@
 use async_std::io::prelude::*;
 use async_std::io::{Error, ErrorKind};
 use async_std::prelude::*;
+use bincode::Options;
 use md5::{Digest, Md5};
 use serde::{Deserialize, Serialize};
 use std::pin::Pin;
-use bincode::Options;
 
 use super::constants::{HEADER_SIZE, MAGIC};
 
@@ -49,7 +49,11 @@ pub struct PacketHeady {
 
 impl PacketHeady {
     pub fn checksum(&self) -> [u8; 16] {
-        let encoded: Vec<u8> = bincode::DefaultOptions::new().with_big_endian().with_fixint_encoding().serialize(&self).unwrap();
+        let encoded: Vec<u8> = bincode::DefaultOptions::new()
+            .with_big_endian()
+            .with_fixint_encoding()
+            .serialize(&self)
+            .unwrap();
         let mut hasher = Md5::new();
         hasher.update(encoded);
         let tmp = hasher.finalize();
@@ -74,11 +78,22 @@ pub struct Packet {
 }
 
 impl Packet {
-    pub async fn send<T: Write + WriteExt>(&self, mut stream: Pin<&mut T>) -> async_std::io::Result<()> {
+    pub async fn send<T: Write + WriteExt>(
+        &self,
+        mut stream: Pin<&mut T>,
+    ) -> async_std::io::Result<()> {
         let header = self.heady.header;
         let body = self.heady.body.clone();
         let checksum = self.checksum;
-        stream.write_all(&bincode::DefaultOptions::new().with_big_endian().with_fixint_encoding().serialize(&header).unwrap()).await?;
+        stream
+            .write_all(
+                &bincode::DefaultOptions::new()
+                    .with_big_endian()
+                    .with_fixint_encoding()
+                    .serialize(&header)
+                    .unwrap(),
+            )
+            .await?;
         stream.write_all(&body).await?;
         stream.write_all(&checksum).await?;
         stream.flush().await?;
@@ -91,7 +106,11 @@ impl Packet {
         let mut buf: [u8; HEADER_SIZE] = [0; HEADER_SIZE];
         stream.read_exact(&mut buf).await?;
         dbg!(buf.clone());
-        if let Ok(header) = bincode::DefaultOptions::new().with_big_endian().with_fixint_encoding().deserialize::<PacketHeader>(&buf) {
+        if let Ok(header) = bincode::DefaultOptions::new()
+            .with_big_endian()
+            .with_fixint_encoding()
+            .deserialize::<PacketHeader>(&buf)
+        {
             dbg!(header.clone());
             if header.check_magic() {
                 let mut body: Vec<u8> = Vec::new();
