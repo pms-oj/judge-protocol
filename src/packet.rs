@@ -105,13 +105,11 @@ impl Packet {
     ) -> async_std::io::Result<Self> {
         let mut buf: [u8; HEADER_SIZE] = [0; HEADER_SIZE];
         stream.read_exact(&mut buf).await?;
-        dbg!(buf.clone());
         if let Ok(header) = bincode::DefaultOptions::new()
             .with_big_endian()
             .with_fixint_encoding()
             .deserialize::<PacketHeader>(&buf)
         {
-            dbg!(header.clone());
             if header.check_magic() {
                 let mut body: Vec<u8> = Vec::new();
                 body.resize(header.length as usize, 0);
@@ -122,7 +120,6 @@ impl Packet {
                     heady: PacketHeady { header, body },
                     checksum,
                 };
-                dbg!(packet.clone());
                 if packet.verify() {
                     Ok(packet)
                 } else {
