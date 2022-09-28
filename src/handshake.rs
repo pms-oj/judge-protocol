@@ -5,7 +5,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct HandshakeRequest {
     pub client_pubkey: PublicKey,
-    pub pass: String,
+    pub pass: Vec<u8>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
