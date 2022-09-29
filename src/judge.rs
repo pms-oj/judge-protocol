@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum JudgeState {
@@ -26,8 +26,8 @@ pub enum JudgeState {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct JudgeRequestBody {
     pub lang: String,
-    pub checker_code: Vec<u8>, // encrypted by standard cipher
-    pub main_code: Vec<u8>, // encrypted by standard cipher
+    pub checker_code: Vec<u8>,    // encrypted by standard cipher
+    pub main_code: Vec<u8>,       // encrypted by standard cipher
     pub test_cases: Vec<Vec<u8>>, // encrypted by standard cipher
 }
 
