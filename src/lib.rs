@@ -4,6 +4,8 @@ extern crate static_assertions;
 pub mod constants;
 pub mod handshake;
 pub mod packet;
+pub mod judge;
+pub mod security;
 
 #[cfg(test)]
 mod tests {

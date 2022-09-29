@@ -16,10 +16,12 @@ pub enum Command {
     VerifyToken = 0x01,
     GetLogin = 0x02, // with key exchange by ECDH
     ReqJudge = 0x03,
+    GetJudgeStateUpdate = 0x04,
     // Server
     ReqVerifyToken = 0xF1,
     ReqLogin = 0xF2,
     GetJudge = 0xF3,
+    ReqJudgeStateUpdate = 0xF4,
     Unknown = 0xFF,
 }
 
