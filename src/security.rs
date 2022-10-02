@@ -4,8 +4,17 @@ use chacha20poly1305::{
     ChaCha8Poly1305,
 };
 use generic_array::GenericArray;
+use k256::ecdh::SharedSecret;
+use sha3::Sha3_256;
 
 // The standard encryption method is round-reduced ChaChaPoly1305 (8 rounds)
+
+pub fn expand_key(shared: &SharedSecret) -> GenericArray<u8, U12> {
+    let extracted = shared.extract::<Sha3_256>(None);
+    let mut ret: Vec<u8>  = vec![];
+    extracted.expand(&[], ret.as_mut_slice()).ok();
+    ret.into_iter().collect()
+}
 
 pub fn standard_encrypt(
     key: GenericArray<u8, U32>,

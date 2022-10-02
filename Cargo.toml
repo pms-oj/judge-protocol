@@ -14,4 +14,5 @@ k256 = { version = "0.11.5", features = ["default", "ecdh", "serde"] }
 async-std = "1.12.0"
 chacha20poly1305 = { version = "0.10.1", features = ["reduced-round"] }
 generic-array = { version = "0.14", default-features = false }
+sha3 = "0.10.5"
 
