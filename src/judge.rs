@@ -27,7 +27,8 @@ pub enum JudgeState {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct JudgeRequestBody {
-    pub lang: String,
+    pub main_lang: String,
+    pub checker_lang: String,
     pub checker_code: EncMessage, // encrypted by standard cipher
     pub main_code: EncMessage,    // encrypted by standard cipher
     pub test_cases: Vec<(EncMessage, EncMessage)>, // encrypted by standard cipher
