@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::security::*;
 
@@ -27,8 +28,8 @@ pub enum JudgeState {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct JudgeRequestBody {
-    pub main_lang: String,
-    pub checker_lang: String,
+    pub main_lang: Uuid,
+    pub checker_lang: Uuid,
     pub checker_code: EncMessage, // encrypted by standard cipher
     pub main_code: EncMessage,    // encrypted by standard cipher
     pub test_cases: Vec<(EncMessage, EncMessage)>, // encrypted by standard cipher
