@@ -34,6 +34,7 @@ pub struct JudgeRequestBody {
     pub test_cases: Vec<(EncMessage, EncMessage)>, // encrypted by standard cipher
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct JudgeResponseBody {
     pub result: JudgeState,
 }
