@@ -39,6 +39,8 @@ pub struct JudgeRequestBody {
     pub checker_lang: Uuid,
     pub checker_code: EncMessage, // encrypted by standard cipher
     pub main_code: EncMessage,    // encrypted by standard cipher
+    pub time_limit: f64, // per case
+    pub mem_limit: f64, // per case
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
