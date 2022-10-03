@@ -7,7 +7,7 @@ use crate::security::*;
 pub enum JudgeState {
     /* State */
     DoCompile,
-    CompleteCompile,
+    CompleteCompile(String),
     /* Results */
     // AC
     Accepted(f64, f64),
