@@ -10,22 +10,22 @@ pub enum JudgeState {
     CompleteCompile(String),
     /* Results */
     // AC
-    Accepted(f64, f64),
+    Accepted(Uuid, f64, f64),
     // CE
     CompileError(String),
     // RE* || NZEC
-    RuntimeError(i32), // NZEC by isolate
-    DiedOnSignal(i32),
+    RuntimeError(Uuid, i32), // NZEC by isolate
+    DiedOnSignal(Uuid, i32),
     // FJ (Failed to judge)
     InternalError(String),
     UnknownError,
     LanguageNotFound,
     // TLE
-    TimeLimitExceed,
+    TimeLimitExceed(Uuid),
     // MLE
-    MemLimitExceed,
+    MemLimitExceed(Uuid),
     // WA
-    WrongAnswer(f64, f64),
+    WrongAnswer(Uuid, f64, f64),
     // Internal
     LockedSlave,
     UnlockedSlave,
@@ -42,11 +42,13 @@ pub struct JudgeRequestBody {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TestCaseUpdateBody {
     pub uuid: Uuid,
+    pub test_uuid: Uuid,
     pub stdin: EncMessage,
     pub stdout: EncMessage,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct JudgeResponseBody {
+    pub uuid: Uuid,
     pub result: JudgeState,
 }
