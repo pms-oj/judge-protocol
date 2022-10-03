@@ -21,7 +21,7 @@ pub enum Command {
     ReqVerifyToken = 0xF1,
     ReqLogin = 0xF2,
     GetJudge = 0xF3,
-    ReqJudgeStateUpdate = 0xF4,
+    TestCaseUpdate = 0xF4,
     Unknown = 0xFF,
 }
 

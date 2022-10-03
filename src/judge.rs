@@ -17,7 +17,7 @@ pub enum JudgeState {
     RuntimeError(i32), // NZEC by isolate
     DiedOnSignal(i32),
     // FJ (Failed to judge)
-    InternalError,
+    InternalError(String),
     UnknownError,
     LanguageNotFound,
     // TLE
@@ -32,7 +32,13 @@ pub struct JudgeRequestBody {
     pub checker_lang: Uuid,
     pub checker_code: EncMessage, // encrypted by standard cipher
     pub main_code: EncMessage,    // encrypted by standard cipher
-    pub test_cases: Vec<(EncMessage, EncMessage)>, // encrypted by standard cipher
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct TestCaseUpdateBody {
+    pub uuid: Uuid,
+    pub stdin: EncMessage,
+    pub stdout: EncMessage,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
