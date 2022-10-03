@@ -33,6 +33,7 @@ pub enum JudgeState {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct JudgeRequestBody {
+    pub uuid: Uuid,
     pub main_lang: Uuid,
     pub checker_lang: Uuid,
     pub checker_code: EncMessage, // encrypted by standard cipher
