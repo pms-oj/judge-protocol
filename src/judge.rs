@@ -24,8 +24,11 @@ pub enum JudgeState {
     TimeLimitExceed,
     // MLE
     MemLimitExceed,
+    // WA
+    WrongAnswer(f64, f64),
     // Internal
     LockedSlave,
+    UnlockedSlave,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
