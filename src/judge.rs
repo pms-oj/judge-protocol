@@ -29,6 +29,7 @@ pub enum JudgeState {
     // Internal
     LockedSlave,
     UnlockedSlave,
+    JudgeNotFound,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
