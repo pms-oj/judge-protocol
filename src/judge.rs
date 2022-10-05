@@ -10,7 +10,7 @@ pub enum JudgeState {
     CompleteCompile(String),
     /* Results */
     // AC
-    Accepted(Uuid, f64, f64),
+    Accepted(Uuid, u64, u64),
     // CE
     CompileError(String),
     // RE* || NZEC
@@ -25,7 +25,7 @@ pub enum JudgeState {
     // MLE
     MemLimitExceed(Uuid),
     // WA
-    WrongAnswer(Uuid, f64, f64),
+    WrongAnswer(Uuid, u64, u64),
     // Internal
     LockedSlave,
     UnlockedSlave,
@@ -39,8 +39,8 @@ pub struct JudgeRequestBody {
     pub checker_lang: Uuid,
     pub checker_code: EncMessage, // encrypted by standard cipher
     pub main_code: EncMessage,    // encrypted by standard cipher
-    pub time_limit: f64, // per case
-    pub mem_limit: f64, // per case
+    pub time_limit: u64, // per case, in ms
+    pub mem_limit: u64, // per case, in ms
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
