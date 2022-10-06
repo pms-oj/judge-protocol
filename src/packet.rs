@@ -2,7 +2,7 @@ use async_std::channel::Sender;
 use async_std::net::TcpStream;
 use async_std::io::prelude::*;
 use async_std::io::{Error, ErrorKind};
-use async_std::sync::Arc;
+use async_std::sync::{Arc, Mutex};
 use async_std::prelude::*;
 use bincode::Options;
 use md5::{Digest, Md5};
@@ -85,13 +85,14 @@ pub struct Packet {
 impl Packet {
     pub async fn send(
         &self,
-        stream: Arc<TcpStream>,
+        stream: Arc<Mutex<TcpStream>>,
     ) -> async_std::io::Result<()> {
-        let mut stream = &*stream;
         let header = self.heady.header;
         let body = self.heady.body.clone();
         let checksum = self.checksum;
         stream
+            .lock()
+            .await
             .write_all(
                 &bincode::DefaultOptions::new()
                     .with_big_endian()
@@ -100,9 +101,9 @@ impl Packet {
                     .unwrap(),
             )
             .await?;
-        stream.write_all(&body).await?;
-        stream.write_all(&checksum).await?;
-        stream.flush().await?;
+        stream.lock().await.write_all(&body).await?;
+        stream.lock().await.write_all(&checksum).await?;
+        stream.lock().await.flush().await?;
         Ok(())
     }
 
@@ -125,11 +126,10 @@ impl Packet {
     }
 
     pub async fn from_stream(
-        stream: Arc<TcpStream>,
+        stream: Arc<Mutex<TcpStream>>,
     ) -> async_std::io::Result<Self> {
-        let mut stream = &*stream;
         let mut buf: [u8; HEADER_SIZE] = [0; HEADER_SIZE];
-        stream.read_exact(&mut buf).await?;
+        stream.lock().await.read_exact(&mut buf).await?;
         if let Ok(header) = bincode::DefaultOptions::new()
             .with_big_endian()
             .with_fixint_encoding()
@@ -138,9 +138,9 @@ impl Packet {
             if header.check_magic() {
                 let mut body: Vec<u8> = Vec::new();
                 body.resize(header.length as usize, 0);
-                stream.read_exact(body.as_mut_slice()).await?;
+                stream.lock().await.read_exact(body.as_mut_slice()).await?;
                 let mut checksum: [u8; 16] = [0; 16];
-                stream.read_exact(&mut checksum).await?;
+                stream.lock().await.read_exact(&mut checksum).await?;
                 let packet = Packet {
                     heady: PacketHeady { header, body },
                     checksum,
