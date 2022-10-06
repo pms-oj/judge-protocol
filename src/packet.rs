@@ -1,3 +1,4 @@
+use async_std::channel::Sender;
 use async_std::io::prelude::*;
 use async_std::io::{Error, ErrorKind};
 use async_std::prelude::*;
@@ -100,6 +101,24 @@ impl Packet {
         stream.write_all(&checksum).await?;
         stream.flush().await?;
         Ok(())
+    }
+
+    pub async fn send_with_sender(&self, sender: &mut Sender<Vec<u8>>) {
+        let header = self.heady.header;
+        let mut body = self.heady.body.clone();
+        let checksum = self.checksum;
+        let mut to_send = vec![];
+        to_send
+            .append(
+                &mut bincode::DefaultOptions::new()
+                    .with_big_endian()
+                    .with_fixint_encoding()
+                    .serialize(&header)
+                    .unwrap(),
+            );
+        to_send.append(&mut body);
+        to_send.append(&mut checksum.to_vec());
+        sender.try_send(to_send).ok();
     }
 
     pub async fn from_stream<T: Read + ReadExt>(
