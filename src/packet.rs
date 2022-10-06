@@ -1,6 +1,8 @@
 use async_std::channel::Sender;
+use async_std::net::TcpStream;
 use async_std::io::prelude::*;
 use async_std::io::{Error, ErrorKind};
+use async_std::sync::Arc;
 use async_std::prelude::*;
 use bincode::Options;
 use md5::{Digest, Md5};
@@ -81,10 +83,11 @@ pub struct Packet {
 }
 
 impl Packet {
-    pub async fn send<T: Write + WriteExt>(
+    pub async fn send(
         &self,
-        mut stream: Pin<&mut T>,
+        stream: Arc<TcpStream>,
     ) -> async_std::io::Result<()> {
+        let mut stream = &*stream;
         let header = self.heady.header;
         let body = self.heady.body.clone();
         let checksum = self.checksum;
@@ -121,9 +124,10 @@ impl Packet {
         sender.try_send(to_send).ok();
     }
 
-    pub async fn from_stream<T: Read + ReadExt>(
-        mut stream: Pin<&mut T>,
+    pub async fn from_stream(
+        stream: Arc<TcpStream>,
     ) -> async_std::io::Result<Self> {
+        let mut stream = &*stream;
         let mut buf: [u8; HEADER_SIZE] = [0; HEADER_SIZE];
         stream.read_exact(&mut buf).await?;
         if let Ok(header) = bincode::DefaultOptions::new()
