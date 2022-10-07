@@ -101,7 +101,6 @@ impl Packet {
             .await?;
         stream.lock().await.write_all(&body).await?;
         stream.lock().await.write_all(&checksum).await?;
-        stream.lock().await.write_all(&['\0' as u8, '\0' as u8,'\0' as u8,'\0' as u8]).await?;
         stream.lock().await.flush().await?;
         Ok(())
     }
@@ -120,10 +119,6 @@ impl Packet {
         );
         to_send.append(&mut body);
         to_send.append(&mut checksum.to_vec());
-        to_send.push('\0' as u8);
-        to_send.push('\0' as u8);
-        to_send.push('\0' as u8);
-        to_send.push('\0' as u8);
         sender.try_send(to_send).ok();
     }
 
