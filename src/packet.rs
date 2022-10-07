@@ -129,7 +129,7 @@ impl Packet {
         stream: Arc<Mutex<TcpStream>>,
     ) -> async_std::io::Result<Self> {
         let mut buf: [u8; HEADER_SIZE] = [0; HEADER_SIZE];
-        stream.lock().await.read_exact(&mut buf).await?;
+        stream.lock().await.read(&mut buf).await?;
         debug!("{:?}", buf);
         if let Ok(header) = bincode::DefaultOptions::new()
             .with_big_endian()
@@ -139,9 +139,9 @@ impl Packet {
             if header.check_magic() {
                 let mut body: Vec<u8> = Vec::new();
                 body.resize(header.length as usize, 0);
-                stream.lock().await.read_exact(body.as_mut_slice()).await?;
+                stream.lock().await.read(body.as_mut_slice()).await?;
                 let mut checksum: [u8; 16] = [0; 16];
-                stream.lock().await.read_exact(&mut checksum).await?;
+                stream.lock().await.read(&mut checksum).await?;
                 let packet = Packet {
                     heady: PacketHeady { header, body },
                     checksum,
