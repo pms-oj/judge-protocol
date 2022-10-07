@@ -1,5 +1,6 @@
 use async_std::channel::Sender;
 use async_std::io::prelude::*;
+use async_std::io::BufReader;
 use async_std::io::{Error, ErrorKind};
 use async_std::net::TcpStream;
 use async_std::prelude::*;
@@ -122,39 +123,32 @@ impl Packet {
     }
 
     pub async fn from_stream(stream: Arc<Mutex<TcpStream>>) -> async_std::io::Result<Self> {
-        let mut buf = Vec::new();
-        stream.lock().await.read_to_end(&mut buf).await?;
+        let stream = &*stream.lock().await;
+        let mut reader = BufReader::new(stream);
+        let mut buf: [u8; HEADER_SIZE] = [0; HEADER_SIZE];
+        reader.read(&mut buf).await?;
         debug!("{:?}", buf);
-        if buf.len() < HEADER_SIZE + 16 {
-            Err(Error::new(ErrorKind::InvalidData, "Packet was invalid"))
-        } else {
-            if let Ok(header) = bincode::DefaultOptions::new()
-                .with_big_endian()
-                .with_fixint_encoding()
-                .deserialize::<PacketHeader>(&buf[0..HEADER_SIZE])
-            {
-                if header.check_magic() {
-                    let mut checksum = [0; 16];
-                    for i in (buf.len() - 16)..buf.len() {
-                        checksum[i - (buf.len() - 16)] = buf[i];
-                    }
-                    let packet = Packet {
-                        heady: PacketHeady {
-                            header,
-                            body: buf[HEADER_SIZE..(buf.len() - 16)].to_vec(),
-                        },
-                        checksum,
-                    };
-                    if packet.verify() {
-                        Ok(packet)
-                    } else {
-                        Err(Error::new(ErrorKind::InvalidData, "Packet was invalid"))
-                    }
+        if let Ok(header) = bincode::DefaultOptions::new()
+            .with_big_endian()
+            .with_fixint_encoding()
+            .deserialize::<PacketHeader>(&buf)
+        {
+            if header.check_magic() {
+                let mut body: Vec<u8> = Vec::new();
+                body.resize(header.length as usize, 0);
+                reader.read(body.as_mut_slice()).await?;
+                debug!("{:?}", body.clone());
+                let mut checksum: [u8; 16] = [0; 16];
+                reader.read(&mut checksum).await?;
+                debug!("{:?}", checksum.clone());
+                let packet = Packet {
+                    heady: PacketHeady { header, body },
+                    checksum,
+                };
+                if packet.verify() {
+                    Ok(packet)
                 } else {
-                    Err(Error::new(
-                        ErrorKind::InvalidData,
-                        "Packet header was invalid",
-                    ))
+                    Err(Error::new(ErrorKind::InvalidData, "Packet was invalid"))
                 }
             } else {
                 Err(Error::new(
@@ -162,6 +156,11 @@ impl Packet {
                     "Packet header was invalid",
                 ))
             }
+        } else {
+            Err(Error::new(
+                ErrorKind::InvalidData,
+                "Packet header was invalid",
+            ))
         }
     }
 
