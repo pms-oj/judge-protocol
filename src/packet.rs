@@ -144,6 +144,7 @@ impl Packet {
                     checksum,
                 };
                 if packet.verify() {
+                    debug!("packet is valid");
                     Ok(packet)
                 } else {
                     Err(Error::new(ErrorKind::InvalidData, "Packet was invalid"))
