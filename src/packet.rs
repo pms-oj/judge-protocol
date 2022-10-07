@@ -137,10 +137,10 @@ impl Packet {
                 let mut body: Vec<u8> = Vec::new();
                 body.resize(header.length as usize, 0);
                 reader.read(body.as_mut_slice()).await?;
-                debug!("{:?}", body.clone());
+                //debug!("{:?}", body.clone());
                 let mut checksum: [u8; 16] = [0; 16];
                 reader.read(&mut checksum).await?;
-                debug!("{:?}", checksum.clone());
+                //debug!("{:?}", checksum.clone());
                 let packet = Packet {
                     heady: PacketHeady { header, body },
                     checksum,
