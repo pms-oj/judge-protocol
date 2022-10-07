@@ -1,9 +1,9 @@
 use async_std::channel::Sender;
-use async_std::net::TcpStream;
 use async_std::io::prelude::*;
 use async_std::io::{Error, ErrorKind};
-use async_std::sync::{Arc, Mutex};
+use async_std::net::TcpStream;
 use async_std::prelude::*;
+use async_std::sync::{Arc, Mutex};
 use bincode::Options;
 use md5::{Digest, Md5};
 use serde::{Deserialize, Serialize};
@@ -83,10 +83,7 @@ pub struct Packet {
 }
 
 impl Packet {
-    pub async fn send(
-        &self,
-        stream: Arc<Mutex<TcpStream>>,
-    ) -> async_std::io::Result<()> {
+    pub async fn send(&self, stream: Arc<Mutex<TcpStream>>) -> async_std::io::Result<()> {
         let header = self.heady.header;
         let body = self.heady.body.clone();
         let checksum = self.checksum;
@@ -112,46 +109,52 @@ impl Packet {
         let mut body = self.heady.body.clone();
         let checksum = self.checksum;
         let mut to_send = vec![];
-        to_send
-            .append(
-                &mut bincode::DefaultOptions::new()
-                    .with_big_endian()
-                    .with_fixint_encoding()
-                    .serialize(&header)
-                    .unwrap(),
-            );
+        to_send.append(
+            &mut bincode::DefaultOptions::new()
+                .with_big_endian()
+                .with_fixint_encoding()
+                .serialize(&header)
+                .unwrap(),
+        );
         to_send.append(&mut body);
         to_send.append(&mut checksum.to_vec());
         sender.try_send(to_send).ok();
     }
 
-    pub async fn from_stream(
-        stream: Arc<Mutex<TcpStream>>,
-    ) -> async_std::io::Result<Self> {
-        let mut buf: [u8; HEADER_SIZE] = [0; HEADER_SIZE];
-        stream.lock().await.read(&mut buf).await?;
+    pub async fn from_stream(stream: Arc<Mutex<TcpStream>>) -> async_std::io::Result<Self> {
+        let mut buf = Vec::new();
+        stream.lock().await.read_to_end(&mut buf).await?;
         debug!("{:?}", buf);
-        if let Ok(header) = bincode::DefaultOptions::new()
-            .with_big_endian()
-            .with_fixint_encoding()
-            .deserialize::<PacketHeader>(&buf)
-        {
-            if header.check_magic() {
-                let mut body: Vec<u8> = Vec::new();
-                body.resize(header.length as usize, 0);
-                stream.lock().await.read(body.as_mut_slice()).await?;
-                debug!("{:?}", body.clone());
-                let mut checksum: [u8; 16] = [0; 16];
-                stream.lock().await.read(&mut checksum).await?;
-                debug!("{:?}", checksum.clone());
-                let packet = Packet {
-                    heady: PacketHeady { header, body },
-                    checksum,
-                };
-                if packet.verify() {
-                    Ok(packet)
+        if buf.len() < HEADER_SIZE + 16 {
+            Err(Error::new(ErrorKind::InvalidData, "Packet was invalid"))
+        } else {
+            if let Ok(header) = bincode::DefaultOptions::new()
+                .with_big_endian()
+                .with_fixint_encoding()
+                .deserialize::<PacketHeader>(&buf[0..HEADER_SIZE])
+            {
+                if header.check_magic() {
+                    let mut checksum = [0; 16];
+                    for i in (buf.len() - 16)..buf.len() {
+                        checksum[i - (buf.len() - 16)] = buf[i];
+                    }
+                    let packet = Packet {
+                        heady: PacketHeady {
+                            header,
+                            body: buf[HEADER_SIZE..(buf.len() - 16)].to_vec(),
+                        },
+                        checksum,
+                    };
+                    if packet.verify() {
+                        Ok(packet)
+                    } else {
+                        Err(Error::new(ErrorKind::InvalidData, "Packet was invalid"))
+                    }
                 } else {
-                    Err(Error::new(ErrorKind::InvalidData, "Packet was invalid"))
+                    Err(Error::new(
+                        ErrorKind::InvalidData,
+                        "Packet header was invalid",
+                    ))
                 }
             } else {
                 Err(Error::new(
@@ -159,11 +162,6 @@ impl Packet {
                     "Packet header was invalid",
                 ))
             }
-        } else {
-            Err(Error::new(
-                ErrorKind::InvalidData,
-                "Packet header was invalid",
-            ))
         }
     }
 

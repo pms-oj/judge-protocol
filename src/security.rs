@@ -15,7 +15,7 @@ use crate::constants::*;
 
 pub fn expand_key(shared: &SharedSecret) -> GenericArray<u8, U32> {
     let extracted = shared.extract::<Sha3_256>(None);
-    let mut ret: Vec<u8> = vec![0;KEY_SIZE];
+    let mut ret: Vec<u8> = vec![0; KEY_SIZE];
     extracted.expand(&[], ret.as_mut_slice()).ok();
     ret.into_iter().collect()
 }
