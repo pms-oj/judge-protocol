@@ -143,6 +143,7 @@ impl Packet {
                 debug!("{:?}", body.clone());
                 let mut checksum: [u8; 16] = [0; 16];
                 stream.lock().await.read(&mut checksum).await?;
+                debug!("{:?}", checksum.clone());
                 let packet = Packet {
                     heady: PacketHeady { header, body },
                     checksum,
