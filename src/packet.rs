@@ -130,6 +130,7 @@ impl Packet {
     ) -> async_std::io::Result<Self> {
         let mut buf: [u8; HEADER_SIZE] = [0; HEADER_SIZE];
         stream.lock().await.read_exact(&mut buf).await?;
+        debug!("{:?}", buf);
         if let Ok(header) = bincode::DefaultOptions::new()
             .with_big_endian()
             .with_fixint_encoding()

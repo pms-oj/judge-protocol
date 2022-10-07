@@ -1,6 +1,9 @@
 #[macro_use]
 extern crate static_assertions;
 
+#[macro_use]
+extern crate log;
+
 pub mod constants;
 pub mod handshake;
 pub mod judge;
