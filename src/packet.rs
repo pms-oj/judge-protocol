@@ -140,6 +140,7 @@ impl Packet {
                 let mut body: Vec<u8> = Vec::new();
                 body.resize(header.length as usize, 0);
                 stream.lock().await.read(body.as_mut_slice()).await?;
+                debug!("{:?}", body.clone());
                 let mut checksum: [u8; 16] = [0; 16];
                 stream.lock().await.read(&mut checksum).await?;
                 let packet = Packet {
