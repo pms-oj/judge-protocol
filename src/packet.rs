@@ -84,13 +84,12 @@ pub struct Packet {
 }
 
 impl Packet {
-    pub async fn send(&self, stream: Arc<Mutex<TcpStream>>) -> async_std::io::Result<()> {
+    pub async fn send(&self, stream: Arc<TcpStream>) -> async_std::io::Result<()> {
+        let mut stream = &*stream;
         let header = self.heady.header;
         let body = self.heady.body.clone();
         let checksum = self.checksum;
         stream
-            .lock()
-            .await
             .write_all(
                 &bincode::DefaultOptions::new()
                     .with_big_endian()
@@ -99,9 +98,9 @@ impl Packet {
                     .unwrap(),
             )
             .await?;
-        stream.lock().await.write_all(&body).await?;
-        stream.lock().await.write_all(&checksum).await?;
-        stream.lock().await.flush().await?;
+        stream.write_all(&body).await?;
+        stream.write_all(&checksum).await?;
+        stream.flush().await?;
         Ok(())
     }
 
@@ -122,9 +121,10 @@ impl Packet {
         sender.try_send(to_send).ok();
     }
 
-    pub async fn from_stream(stream: Arc<Mutex<TcpStream>>) -> async_std::io::Result<Self> {
+    pub async fn from_stream(stream: Arc<TcpStream>) -> async_std::io::Result<Self> {
+        let mut stream = &*stream;
         let mut buf: [u8; HEADER_SIZE] = [0; HEADER_SIZE];
-        stream.lock().await.read(&mut buf).await?;
+        stream.read(&mut buf).await?;
         debug!("{:?}", buf);
         if let Ok(header) = bincode::DefaultOptions::new()
             .with_big_endian()
@@ -134,10 +134,10 @@ impl Packet {
             if header.check_magic() {
                 let mut body: Vec<u8> = Vec::new();
                 body.resize(header.length as usize, 0);
-                stream.lock().await.read(body.as_mut_slice()).await?;
+                stream.read(body.as_mut_slice()).await?;
                 debug!("{:?}", body.clone());
                 let mut checksum: [u8; 16] = [0; 16];
-                stream.lock().await.read(&mut checksum).await?;
+                stream.read(&mut checksum).await?;
                 debug!("{:?}", checksum.clone());
                 let packet = Packet {
                     heady: PacketHeady { header, body },
