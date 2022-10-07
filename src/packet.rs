@@ -125,7 +125,7 @@ impl Packet {
         let mut stream = &*stream;
         let mut buf: [u8; HEADER_SIZE] = [0; HEADER_SIZE];
         stream.read(&mut buf).await?;
-        debug!("{:?}", buf);
+        //debug!("{:?}", buf);
         if let Ok(header) = bincode::DefaultOptions::new()
             .with_big_endian()
             .with_fixint_encoding()
@@ -135,10 +135,10 @@ impl Packet {
                 let mut body: Vec<u8> = Vec::new();
                 body.resize(header.length as usize, 0);
                 stream.read(body.as_mut_slice()).await?;
-                debug!("{:?}", body.clone());
+                //debug!("{:?}", body.clone());
                 let mut checksum: [u8; 16] = [0; 16];
                 stream.read(&mut checksum).await?;
-                debug!("{:?}", checksum.clone());
+                //debug!("{:?}", checksum.clone());
                 let packet = Packet {
                     heady: PacketHeady { header, body },
                     checksum,
