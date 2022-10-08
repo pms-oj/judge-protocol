@@ -26,6 +26,8 @@ pub enum Command {
     ReqLogin = 0xF2,
     GetJudge = 0xF3,
     TestCaseUpdate = 0xF4,
+    TestCaseEnd = 0xF5,
+    // General
     Unknown = 0xFF,
 }
 
