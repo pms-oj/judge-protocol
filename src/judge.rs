@@ -17,7 +17,9 @@ pub enum JudgeState {
     RuntimeError(Uuid, i32), // NZEC by isolate
     DiedOnSignal(Uuid, i32),
     // FJ (Failed to judge)
-    InternalError(String),
+    InternalError(Uuid),
+    //General
+    GeneralError(String),
     UnknownError,
     LanguageNotFound,
     // TLE
