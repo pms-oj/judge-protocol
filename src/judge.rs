@@ -18,7 +18,7 @@ pub enum JudgeState {
     DiedOnSignal(Uuid, i32),
     // FJ (Failed to judge)
     InternalError(Uuid),
-    //General
+    // General
     GeneralError(String),
     UnknownError,
     LanguageNotFound,
