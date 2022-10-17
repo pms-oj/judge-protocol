@@ -1,9 +1,11 @@
+use actix::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::security::*;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Message)]
+#[rtype(result = "()")]
 pub enum JudgeState {
     /* State */
     DoCompile,
