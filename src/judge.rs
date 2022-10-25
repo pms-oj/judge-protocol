@@ -43,6 +43,7 @@ pub struct JudgeRequestBody {
     pub checker_lang: Uuid,
     pub manager_lang: Option<Uuid>,
     pub checker_code: EncMessage, // encrypted by standard cipher
+    pub relation_grader_path_main: Option<String>,
     pub main_code: EncMessage,    // encrypted by standard cipher
     pub manager_code: Option<EncMessage>,
     pub graders: Option<EncMessage>,
