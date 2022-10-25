@@ -41,8 +41,11 @@ pub struct JudgeRequestBody {
     pub uuid: Uuid,
     pub main_lang: Uuid,
     pub checker_lang: Uuid,
+    pub manager_lang: Option<Uuid>,
     pub checker_code: EncMessage, // encrypted by standard cipher
     pub main_code: EncMessage,    // encrypted by standard cipher
+    pub manager_code: Option<EncMessage>,
+    pub graders: Option<EncMessage>,
     pub time_limit: u64,          // per case, in ms
     pub mem_limit: u64,           // per case, in ms
 }
