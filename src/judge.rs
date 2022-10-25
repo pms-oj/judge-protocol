@@ -58,7 +58,8 @@ pub struct JudgeRequestBodyv2 {
     pub main_code: EncMessage,    // encrypted by standard cipher
     pub manager_code: EncMessage, // encrypted by standard cipher
     pub graders: EncMessage,      // encrypted by standard cipher
-    pub relation_grader_path_main: String,
+    pub main_path: String,
+    pub object_path: String,
     pub time_limit: u64, // per case, in ms
     pub mem_limit: u64,  // per case, in ms
 }
