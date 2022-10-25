@@ -11,8 +11,9 @@ pub enum JudgeState {
     DoCompile,
     CompleteCompile(String),
     /* Results */
-    // AC
+    // AC or Complete
     Accepted(Uuid, u64, u64),
+    Complete(Uuid, f64, u64, u64),
     // CE
     CompileError(String),
     // RE* || NZEC
@@ -41,14 +42,25 @@ pub struct JudgeRequestBody {
     pub uuid: Uuid,
     pub main_lang: Uuid,
     pub checker_lang: Uuid,
-    pub manager_lang: Option<Uuid>,
     pub checker_code: EncMessage, // encrypted by standard cipher
-    pub relation_grader_path_main: Option<String>,
     pub main_code: EncMessage,    // encrypted by standard cipher
-    pub manager_code: Option<EncMessage>,
-    pub graders: Option<EncMessage>,
     pub time_limit: u64,          // per case, in ms
     pub mem_limit: u64,           // per case, in ms
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct JudgeRequestBodyv2 {
+    pub uuid: Uuid,
+    pub main_lang: Uuid,
+    pub checker_lang: Uuid,
+    pub manager_lang: Uuid,
+    pub checker_code: EncMessage, // encrypted by standard cipher
+    pub main_code: EncMessage,    // encrypted by standard cipher
+    pub manager_code: EncMessage, // encrypted by standard cipher
+    pub graders: EncMessage,      // encrypted by standard cipher
+    pub relation_grader_path_main: String,
+    pub time_limit: u64, // per case, in ms
+    pub mem_limit: u64,  // per case, in ms
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

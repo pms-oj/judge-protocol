@@ -15,20 +15,22 @@ use super::constants::{HEADER_SIZE, MAGIC};
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq)]
 #[repr(u32)]
 pub enum Command {
-    Handshake = 0x00,
+    Handshake = 0x0000,
     // Client
-    VerifyToken = 0x01,
-    GetLogin = 0x02, // with key exchange by ECDH
-    ReqJudge = 0x03,
-    GetJudgeStateUpdate = 0x04,
+    VerifyToken = 0x0001,
+    GetLogin = 0x0002, // with key exchange by ECDH
+    ReqJudge = 0x0003,
+    ReqJudgev2 = 0x0F03,
+    GetJudgeStateUpdate = 0x0004,
     // Server
-    ReqVerifyToken = 0xF1,
-    ReqLogin = 0xF2,
-    GetJudge = 0xF3,
-    TestCaseUpdate = 0xF4,
-    TestCaseEnd = 0xF5,
+    ReqVerifyToken = 0xF001,
+    ReqLogin = 0xF002,
+    GetJudge = 0xF003,
+    GetJudgev2 = 0xFF03,
+    TestCaseUpdate = 0xF004,
+    TestCaseEnd = 0xF005,
     // General
-    Unknown = 0xFF,
+    Unknown = 0xFFFF,
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq)]
