@@ -128,7 +128,7 @@ impl Packet {
     pub async fn from_stream(stream: Arc<TcpStream>) -> async_std::io::Result<Self> {
         let mut stream = &*stream;
         let mut buf: [u8; HEADER_SIZE] = [0; HEADER_SIZE];
-        stream.read(&mut buf).await?;
+        stream.peek(&mut buf).await?;
         //trace!("{:?}", buf);
         if let Ok(header) = bincode::DefaultOptions::new()
             .with_big_endian()
@@ -138,10 +138,10 @@ impl Packet {
             if header.check_magic() {
                 let mut body: Vec<u8> = Vec::new();
                 body.resize(header.length as usize, 0);
-                stream.read(body.as_mut_slice()).await?;
+                stream.peek(body.as_mut_slice()).await?;
                 //trace!("{:?}", body.clone());
                 let mut checksum: [u8; 16] = [0; 16];
-                stream.read(&mut checksum).await?;
+                stream.peek(&mut checksum).await?;
                 //trace!("{:?}", checksum.clone());
                 let packet = Packet {
                     heady: PacketHeady { header, body },
@@ -149,6 +149,7 @@ impl Packet {
                 };
                 if packet.verify() {
                     trace!("packet is valid");
+                    stream.read(&mut vec![0; HEADER_SIZE + (header.length as usize) + 16]);
                     Ok(packet)
                 } else {
                     Err(Error::new(ErrorKind::InvalidData, "Packet was invalid"))
