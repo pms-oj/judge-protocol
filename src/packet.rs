@@ -129,7 +129,6 @@ impl Packet {
         let mut stream = &*stream;
         let mut buf: [u8; HEADER_SIZE] = [0; HEADER_SIZE];
         stream.peek(&mut buf).await?;
-        debug!("{:?}", buf.clone());
         //trace!("{:?}", buf);
         if let Ok(header) = bincode::DefaultOptions::new()
             .with_big_endian()
