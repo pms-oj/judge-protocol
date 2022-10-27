@@ -60,6 +60,7 @@ pub struct JudgeRequestBodyv2 {
     pub graders: EncMessage,      // encrypted by standard cipher
     pub main_path: String,
     pub object_path: String,
+    pub procs: usize,
     pub time_limit: u64, // per case, in ms
     pub mem_limit: u64,  // per case, in ms
 }
