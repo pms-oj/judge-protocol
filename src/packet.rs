@@ -138,12 +138,12 @@ impl Packet {
             if header.check_magic() {
                 let mut body: Vec<u8> = Vec::new();
                 body.resize(header.length as usize, 0);
-                stream.read(&mut vec![0; HEADER_SIZE]).await?;
-                stream.read(body.as_mut_slice()).await?;
+                stream.read_exact(&mut vec![0; HEADER_SIZE]).await?;
+                stream.read_exact(body.as_mut_slice()).await?;
                 //trace!("{:?}", body.clone());
                 let mut checksum: [u8;
                  16] = [0; 16];
-                stream.read(&mut checksum).await?;
+                stream.read_exact(&mut checksum).await?;
                 //trace!("{:?}", checksum.clone());
                 let packet = Packet {
                     heady: PacketHeady { header, body },
