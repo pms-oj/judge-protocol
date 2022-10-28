@@ -103,7 +103,7 @@ impl Packet {
         Ok(())
     }
 
-    pub async fn send_with_sender(&self, sender: &mut Sender<Vec<u8>>) {
+    pub async fn send_with_sender(&self, sender: Sender<Vec<u8>>) {
         let header = self.heady.header;
         let mut body = self.heady.body.clone();
         let checksum = self.checksum;
