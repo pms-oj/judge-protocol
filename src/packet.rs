@@ -6,7 +6,6 @@ use async_std::net::TcpStream;
 use async_std::prelude::*;
 use async_std::sync::{Arc, Mutex};
 use bincode::Options;
-use md5::{Digest, Md5};
 use serde::{Deserialize, Serialize};
 use std::pin::Pin;
 
@@ -58,17 +57,13 @@ pub struct PacketHeady {
 }
 
 impl PacketHeady {
-    pub fn checksum(&self) -> [u8; 16] {
+    pub fn checksum(&self) -> [u8; 32] {
         let encoded: Vec<u8> = bincode::DefaultOptions::new()
             .with_big_endian()
             .with_fixint_encoding()
             .serialize(&self)
             .unwrap();
-        let mut hasher = Md5::new();
-        hasher.update(encoded);
-        let tmp = hasher.finalize();
-        let r: &[u8; 16] = tmp.as_ref();
-        r.clone()
+        *blake3::hash(&encoded).as_bytes()
     }
 
     pub fn make_packet(command: Command, body: Vec<u8>) -> Self {
@@ -84,7 +79,7 @@ impl PacketHeady {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Packet {
     pub heady: PacketHeady,
-    pub checksum: [u8; 16], // md5 checksum of (header || body)
+    pub checksum: [u8; 32], // blake3 checksum of (header || body)
 }
 
 impl Packet {
@@ -140,11 +135,8 @@ impl Packet {
                 body.resize(header.length as usize, 0);
                 stream.read_exact(&mut vec![0; HEADER_SIZE]).await?;
                 stream.read_exact(body.as_mut_slice()).await?;
-                //trace!("{:?}", body.clone());
-                let mut checksum: [u8;
-                 16] = [0; 16];
+                let mut checksum: [u8; 32] = [0; 32];
                 stream.read_exact(&mut checksum).await?;
-                //trace!("{:?}", checksum.clone());
                 let packet = Packet {
                     heady: PacketHeady { header, body },
                     checksum,

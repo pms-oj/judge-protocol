@@ -10,12 +10,11 @@ license = "MIT"
 static_assertions = "1"
 serde = { version="1", features = ["derive"] }
 bincode = "1.3.3"
-md-5 = "0.10.5"
+blake3 = { version = "1.3.1", features = ["traits-preview"] }
 k256 = { version = "0.11.5", features = ["default", "ecdh", "serde"] }
 async-std = "1.12.0"
 chacha20poly1305 = { version = "0.10.1", features = ["reduced-round"] }
 generic-array = { version = "0.14", default-features = false }
-sha3 = "0.10.5"
 rand = "0.8.5"
 log = "0.4.17"
 actix = "0.13"
