@@ -1,3 +1,4 @@
+use blake3::Hasher;
 use chacha20poly1305::consts::{U12, U32};
 use chacha20poly1305::{
     aead::{Aead, KeyInit},
@@ -7,7 +8,6 @@ use generic_array::GenericArray;
 use k256::ecdh::SharedSecret;
 use rand::thread_rng;
 use serde::{Deserialize, Serialize};
-use blake3::Hasher;
 
 use crate::constants::*;
 
