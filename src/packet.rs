@@ -1,13 +1,7 @@
 use async_std::channel::Sender;
 use async_std::io::prelude::*;
-use async_std::io::BufReader;
-use async_std::io::{Error, ErrorKind};
-use async_std::net::TcpStream;
-use async_std::prelude::*;
-use async_std::sync::{Arc, Mutex};
-use bincode::Options;
+use s2n_quic::stream::{ReceiveStream, SendStream};
 use serde::{Deserialize, Serialize};
-use std::pin::Pin;
 
 use super::constants::{HEADER_SIZE, MAGIC};
 
@@ -36,8 +30,7 @@ pub enum Command {
 #[repr(C, packed)]
 pub struct PacketHeader {
     magic: u32,           // 4 bytes
-    pub command: Command, // 2 bytes
-    pub length: u32,      // 4 bytes
+    pub command: Command, // 4 bytes
 }
 
 impl PacketHeader {
@@ -49,131 +42,41 @@ impl PacketHeader {
 const_assert!(std::mem::size_of::<Command>() == 4);
 const_assert!(std::mem::size_of::<PacketHeader>() == HEADER_SIZE);
 
-// header || body
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
-pub struct PacketHeady {
-    pub header: PacketHeader,
+pub struct Packet {
+    header: PacketHeader,
     pub body: Vec<u8>,
 }
 
-impl PacketHeady {
-    pub fn checksum(&self) -> [u8; 32] {
-        let encoded: Vec<u8> = bincode::DefaultOptions::new()
-            .with_big_endian()
-            .with_fixint_encoding()
-            .serialize(&self)
-            .unwrap();
-        *blake3::hash(&encoded).as_bytes()
-    }
-
-    pub fn make_packet(command: Command, body: Vec<u8>) -> Self {
-        let header = PacketHeader {
-            magic: MAGIC,
-            command,
-            length: (body.len() as u32), // safe size_of::<usize>() >= 4
-        };
-        PacketHeady { header, body }
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
-pub struct Packet {
-    pub heady: PacketHeady,
-    pub checksum: [u8; 32], // blake3 checksum of (header || body)
-}
-
 impl Packet {
-    pub async fn send(&self, stream: Arc<TcpStream>) -> async_std::io::Result<()> {
-        let mut stream = &*stream;
-        let header = self.heady.header;
-        let body = self.heady.body.clone();
-        let checksum = self.checksum;
+    pub async fn send(&self, stream: &mut SendStream) -> async_std::io::Result<()> {
         stream
             .write_all(
-                &bincode::DefaultOptions::new()
-                    .with_big_endian()
-                    .with_fixint_encoding()
-                    .serialize(&header)
-                    .unwrap(),
+                &bincode::serialize(&self)
+                    .expect("Failed to serialize a packet when running bincode::serialize"),
             )
             .await?;
-        stream.write_all(&body).await?;
-        stream.write_all(&checksum).await?;
-        stream.flush().await?;
         Ok(())
     }
 
     pub async fn send_with_sender(&self, sender: Sender<Vec<u8>>) {
-        let header = self.heady.header;
-        let mut body = self.heady.body.clone();
-        let checksum = self.checksum;
-        let mut to_send = vec![];
-        to_send.append(
-            &mut bincode::DefaultOptions::new()
-                .with_big_endian()
-                .with_fixint_encoding()
-                .serialize(&header)
-                .unwrap(),
-        );
-        to_send.append(&mut body);
-        to_send.append(&mut checksum.to_vec());
-        sender.try_send(to_send).ok();
+        sender
+            .try_send(
+                bincode::serialize(&self)
+                    .expect("Failed to serialize a packet when running bincode::serialize"),
+            )
+            .ok();
     }
 
-    pub async fn from_stream(stream: Arc<TcpStream>) -> async_std::io::Result<Self> {
-        let mut stream = &*stream;
-        let mut buf: [u8; HEADER_SIZE] = [0; HEADER_SIZE];
-        stream.peek(&mut buf).await?;
-        //trace!("{:?}", buf);
-        if let Ok(header) = bincode::DefaultOptions::new()
-            .with_big_endian()
-            .with_fixint_encoding()
-            .deserialize::<PacketHeader>(&buf)
-        {
-            if header.check_magic() {
-                let mut body: Vec<u8> = Vec::new();
-                body.resize(header.length as usize, 0);
-                stream.read_exact(&mut vec![0; HEADER_SIZE]).await?;
-                stream.read_exact(body.as_mut_slice()).await?;
-                let mut checksum: [u8; 32] = [0; 32];
-                stream.read_exact(&mut checksum).await?;
-                let packet = Packet {
-                    heady: PacketHeady { header, body },
-                    checksum,
-                };
-                if packet.verify() {
-                    trace!("packet is valid");
-                    Ok(packet)
-                } else {
-                    Err(Error::new(ErrorKind::InvalidData, "Packet was invalid"))
-                }
-            } else {
-                Err(Error::new(
-                    ErrorKind::InvalidData,
-                    "Packet header was invalid",
-                ))
-            }
+    pub async fn from_stream(stream: &mut ReceiveStream) -> async_std::io::Result<Self> {
+        if let Some(data) = stream.receive().await? {
+            Ok(bincode::deserialize(&data).expect(
+                "Failed to deserialize a received packet when running bincode::deserialize",
+            ))
         } else {
-            Err(Error::new(
-                ErrorKind::InvalidData,
-                "Packet header was invalid",
+            Err(async_std::io::Error::from(
+                async_std::io::ErrorKind::InvalidData,
             ))
         }
-    }
-
-    pub fn make_packet(command: Command, body: Vec<u8>) -> Self {
-        Self::from_heady(PacketHeady::make_packet(command, body))
-    }
-
-    pub fn from_heady(heady: PacketHeady) -> Self {
-        let check = heady.checksum();
-        Self {
-            heady: heady,
-            checksum: check,
-        }
-    }
-
-    pub fn verify(&self) -> bool {
-        self.heady.checksum() == self.checksum
     }
 }
