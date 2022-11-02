@@ -49,6 +49,16 @@ pub struct Packet {
 }
 
 impl Packet {
+    pub fn make_packet(command: Command, body: Vec<u8>) -> Self {
+        Self {
+            header: PacketHeader {
+                magic: MAGIC,
+                command,
+            },
+            body,
+        }
+    }
+
     pub async fn send(&self, stream: &mut SendStream) -> async_std::io::Result<()> {
         stream
             .write_all(
