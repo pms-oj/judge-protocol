@@ -1,6 +1,6 @@
 use async_std::channel::Sender;
 use async_std::io::prelude::*;
-use s2n_quic::stream::{ReceiveStream, SendStream};
+use s2n_quic::stream::{BidirectionalStream, ReceiveStream, SendStream};
 use serde::{Deserialize, Serialize};
 
 use super::constants::{HEADER_SIZE, MAGIC};
@@ -59,7 +59,7 @@ impl Packet {
         }
     }
 
-    pub async fn send(&self, stream: &mut SendStream) -> async_std::io::Result<()> {
+    pub async fn send(&self, stream: &mut BidirectionalStream) -> async_std::io::Result<()> {
         stream
             .write_all(
                 &bincode::serialize(&self)
@@ -74,7 +74,7 @@ impl Packet {
             .expect("Failed to serialize a packet when running bincode::serialize")
     }
 
-    pub async fn from_stream(stream: &mut ReceiveStream) -> async_std::io::Result<Self> {
+    pub async fn from_stream(stream: &mut BidirectionalStream) -> async_std::io::Result<Self> {
         if let Some(data) = stream.receive().await? {
             Ok(bincode::deserialize(&data).expect(
                 "Failed to deserialize a received packet when running bincode::deserialize",
