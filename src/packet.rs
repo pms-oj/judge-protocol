@@ -59,13 +59,9 @@ impl Packet {
         Ok(())
     }
 
-    pub async fn send_with_sender(&self, sender: Sender<Vec<u8>>) {
-        sender
-            .try_send(
-                bincode::serialize(&self)
-                    .expect("Failed to serialize a packet when running bincode::serialize"),
-            )
-            .ok();
+    pub fn serialize(&self) -> Vec<u8> {
+        bincode::serialize(&self)
+            .expect("Failed to serialize a packet when running bincode::serialize")
     }
 
     pub async fn from_stream(stream: &mut ReceiveStream) -> async_std::io::Result<Self> {
