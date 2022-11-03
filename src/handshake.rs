@@ -1,6 +1,7 @@
 use bincode::Options;
 use k256::PublicKey;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct HandshakeRequest {
@@ -18,13 +19,13 @@ pub enum HandshakeResult {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct HandshakeResponse {
     pub result: HandshakeResult,
-    pub node_id: Option<u32>, // asigned
+    pub node_id: Option<Uuid>, // asigned
     pub server_pubkey: Option<PublicKey>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BodyAfterHandshake<T> {
-    pub node_id: u32,
+    pub node_id: Uuid,
     pub client_pubkey: PublicKey,
     pub req: T,
 }
