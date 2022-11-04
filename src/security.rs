@@ -8,12 +8,13 @@ use generic_array::GenericArray;
 use k256::ecdh::SharedSecret;
 use rand::thread_rng;
 use serde::{Deserialize, Serialize};
+use async_std::sync::Arc;
 
 use crate::constants::*;
 
 // The standard encryption method is round-reduced ChaChaPoly1305 (8 rounds)
 
-pub fn expand_key(shared: &SharedSecret) -> GenericArray<u8, U32> {
+pub fn expand_key(shared: Arc<SharedSecret>) -> GenericArray<u8, U32> {
     let extracted = shared.extract::<Hasher>(None);
     let mut ret: Vec<u8> = vec![0; KEY_SIZE];
     extracted.expand(&[], ret.as_mut_slice()).ok();
