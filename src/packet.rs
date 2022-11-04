@@ -44,7 +44,7 @@ const_assert!(std::mem::size_of::<PacketHeader>() == HEADER_SIZE);
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Packet {
-    header: PacketHeader,
+    pub header: PacketHeader,
     pub body: Vec<u8>,
 }
 
