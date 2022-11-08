@@ -35,17 +35,10 @@ where
     T: Serialize + DeserializeOwned + Clone,
 {
     pub fn bytes(&self) -> Vec<u8> {
-        bincode::DefaultOptions::new()
-            .with_big_endian()
-            .with_fixint_encoding()
-            .serialize(self)
-            .unwrap()
+        bincode::serialize(self).unwrap()
     }
 
     pub fn from_bytes(&self, bytes: Vec<u8>) -> bincode::Result<Self> {
-        bincode::DefaultOptions::new()
-            .with_big_endian()
-            .with_fixint_encoding()
-            .deserialize::<Self>(&bytes)
+        bincode::deserialize::<Self>(&bytes)
     }
 }
