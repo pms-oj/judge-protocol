@@ -78,9 +78,13 @@ impl Packet {
     pub async fn from_stream(stream: &mut ReceiveStream) -> async_std::io::Result<Self> {
         if let Some(data) = stream.receive().await? {
             debug!("Received data; data length: {}", data.len());
-            Ok(bincode::deserialize(&data).expect(
-                "Failed to deserialize a received packet when running bincode::deserialize",
-            ))
+            if let Ok(packet) = bincode::deserialize(&data) {
+                Ok(packet)
+            } else {
+                Err(async_std::io::Error::from(
+                    async_std::io::ErrorKind::InvalidData,
+                ))
+            }
         } else {
             Err(async_std::io::Error::from(
                 async_std::io::ErrorKind::InvalidData,
