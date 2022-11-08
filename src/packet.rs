@@ -61,9 +61,10 @@ impl Packet {
 
     pub async fn send(&self, stream: &mut SendStream) -> async_std::io::Result<()> {
         stream
-            .write_all(
-                &bincode::serialize(&self)
-                    .expect("Failed to serialize a packet when running bincode::serialize"),
+            .send(
+                bincode::serialize(&self)
+                    .expect("Failed to serialize a packet when running bincode::serialize")
+                    .into(),
             )
             .await?;
         Ok(())
